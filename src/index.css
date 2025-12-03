@@ -6,6 +6,47 @@
 
 @layer base {
   :root {
+    /* --- LIGHT MODE (GIAO DIỆN SÁNG) --- */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+
+    --radius: 0.75rem;
+
+    /* Giữ nguyên các màu Custom nhưng chỉnh cho hợp nền sáng */
+    --cyber-green: 160 100% 35%;
+    --cyber-cyan: 185 100% 40%;
+    --cyber-purple: 270 80% 50%;
+    --glow-primary: 221.2 83.2% 53.3%;
+    --glow-accent: 350 85% 65%;
+  }
+
+  .dark {
+    /* --- DARK MODE (GIAO DIỆN TỐI - CỦA BẠN) --- */
     --background: 220 15% 8%;
     --foreground: 210 20% 90%;
 
@@ -27,36 +68,19 @@
     --accent: 350 85% 65%;
     --accent-foreground: 210 20% 98%;
 
-
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 220 15% 20%;
     --input: 220 15% 20%;
     --ring: 210 100% 60%;
 
-    --radius: 0.75rem;
-
-    --sidebar-background: 220 15% 10%;
-    --sidebar-foreground: 210 20% 85%;
-    --sidebar-primary: 210 100% 60%;
-    --sidebar-primary-foreground: 220 15% 8%;
-    --sidebar-accent: 220 15% 15%;
-    --sidebar-accent-foreground: 210 20% 85%;
-    --sidebar-border: 220 15% 18%;
-    --sidebar-ring: 210 100% 60%;
-
-    /* Custom colors */
+    /* Custom colors cho dark mode */
     --cyber-green: 160 100% 45%;
     --cyber-cyan: 185 100% 50%;
     --cyber-purple: 270 80% 60%;
     --glow-primary: 210 100% 60%;
     --glow-accent: 350 85% 65%;
-  }
-
-  .dark {
-    --background: 220 15% 8%;
-    --foreground: 210 20% 90%;
   }
 }
 
@@ -135,6 +159,13 @@
   .animate-slide-up {
     animation: slide-up 0.5s ease-out;
   }
+
+  /* ĐOẠN NÀY ĐỂ HIỂN THỊ CHỮ DỌC 2 BÊN */
+  .writing-vertical {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    letter-spacing: 0.2em;
+  }
 }
 
 @keyframes float {
@@ -178,11 +209,4 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground));
-}
-
-/* Vertical text */
-.writing-vertical {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  letter-spacing: 0.2em;
 }
