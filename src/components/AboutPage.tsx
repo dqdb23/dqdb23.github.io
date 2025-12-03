@@ -11,7 +11,7 @@ export const AboutPage = () => {
         
         <p className="text-secondary-foreground leading-relaxed mb-6">
           Hello! I'm a passionate <span className="text-primary font-medium">Malware Analyst</span> and{' '}
-          <span className="text-accent font-medium">Cyber Threat Hunter</span> with years of experience in 
+          <span className="text-primary font-medium">Cyber Threat Hunter</span> with years of experience in 
           dissecting malicious software and protecting digital infrastructure.
         </p>
 
