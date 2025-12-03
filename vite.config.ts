@@ -3,21 +3,21 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  // Với repo dqdb23.github.io, base luôn là '/'
   base: "/",
-  
   server: {
     host: "::",
     port: 8080,
   },
-  
+  // 👇 THÊM ĐOẠN NÀY ĐỂ FIX LỖI MÀN HÌNH TRẮNG
+  define: {
+    global: 'window',
+  },
+  // ------------------------------------------
   plugins: [
     react(),
     mode === "development" && componentTagger()
   ].filter(Boolean),
-  
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
