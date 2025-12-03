@@ -147,9 +147,12 @@ const Index = () => {
     );
   };
 
-  return (
-    <div className="min-h-screen bg-background relative overflow-hidden font-sans text-foreground">
-      <ParticleCanvas />
+return (
+    <div className="min-h-screen bg-background relative overflow-hidden font-sans text-foreground transition-colors duration-300">
+      
+      {/* 👇 CHỈ HIỆN HIỆU ỨNG HẠT KHI Ở CHẾ ĐỘ DARK */}
+      {theme === 'dark' && <ParticleCanvas />}
+      
       <div className="content-container relative z-10">
         <div className="max-w-2xl mx-auto px-4 py-12 md:py-16">
           <Header 
