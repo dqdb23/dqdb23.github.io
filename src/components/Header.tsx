@@ -1,11 +1,12 @@
 import { Search } from 'lucide-react';
 
+// Định nghĩa kiểu dữ liệu (Interface)
 interface HeaderProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
-  profileImage?: string; // Thêm dòng này để nhận ảnh
+  profileImage?: string;
 }
 
 export const Header = ({ 
@@ -13,7 +14,7 @@ export const Header = ({
   onTabChange, 
   searchQuery, 
   onSearchChange,
-  profileImage // Nhận biến ảnh
+  profileImage 
 }: HeaderProps) => {
   return (
     <header className="mb-12 animate-fade-in">
@@ -22,12 +23,10 @@ export const Header = ({
           <div className="relative group">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-full opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 blur"></div>
             <img 
-              // Nếu không có ảnh thì dùng ảnh placeholder
               src={profileImage || "https://github.com/shadcn.png"} 
               alt="Profile"
-              className="relative w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-background"
+              className="relative w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-background bg-secondary"
               onError={(e) => {
-                // Nếu lỗi load ảnh thì chuyển về ảnh mặc định
                 e.currentTarget.src = "https://github.com/shadcn.png";
               }}
             />
