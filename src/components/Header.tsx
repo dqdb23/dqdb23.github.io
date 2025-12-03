@@ -6,9 +6,9 @@ interface HeaderProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   profileImage?: string;
-  // 👇 Thêm 2 props mới cho Theme
-  theme: 'dark' | 'light';
-  onThemeToggle: () => void;
+  // Thêm dấu ? để không bắt buộc (tránh crash)
+  theme?: 'dark' | 'light'; 
+  onThemeToggle?: () => void;
 }
 
 export const Header = ({ 
@@ -17,8 +17,8 @@ export const Header = ({
   searchQuery, 
   onSearchChange,
   profileImage,
-  theme,           // Nhận biến theme
-  onThemeToggle    // Nhận hàm đổi theme
+  theme = 'dark', // Giá trị mặc định
+  onThemeToggle = () => {} // Hàm rỗng mặc định
 }: HeaderProps) => {
   return (
     <header className="mb-12 animate-fade-in">
@@ -35,7 +35,7 @@ export const Header = ({
           </div>
           
           <div className="space-y-2">
-            <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
+            <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">
               \Some..............
             </h1>
             <p className="text-muted-foreground font-mono text-sm md:text-base">
@@ -44,10 +44,10 @@ export const Header = ({
           </div>
         </div>
 
-        {/* 👇 NÚT THEME ĐÃ ĐƯỢC SỬA */}
+        {/* Nút Theme */}
         <button 
           onClick={onThemeToggle}
-          className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 hover:bg-secondary transition-all hover:scale-105 active:scale-95 text-sm font-medium border border-border/50 shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 hover:bg-secondary transition-all hover:scale-105 active:scale-95 text-sm font-medium border border-white/10 shadow-sm"
         >
           {theme === 'dark' ? (
             <>
@@ -71,11 +71,11 @@ export const Header = ({
             placeholder="Search posts..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full bg-secondary/30 border border-border/50 rounded-2xl py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-secondary/50 transition-all placeholder:text-muted-foreground/50"
+            className="w-full bg-secondary/30 border border-white/10 rounded-2xl py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-secondary/50 transition-all placeholder:text-muted-foreground/50"
           />
         </div>
 
-        <nav className="flex gap-2 p-1 bg-secondary/30 rounded-xl w-fit backdrop-blur-sm border border-border/50">
+        <nav className="flex gap-2 p-1 bg-secondary/30 rounded-xl w-fit backdrop-blur-sm border border-white/5">
           {['home', 'archive', 'about'].map((tab) => (
             <button
               key={tab}
