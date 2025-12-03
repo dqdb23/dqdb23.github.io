@@ -1,6 +1,8 @@
 import { ArrowLeft, Calendar, Heart, Share2 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Post {
   id: string;
@@ -32,7 +34,7 @@ export const PostDetail = ({ post, onBack }: PostDetailProps) => {
         className="mb-6 text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-full"
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
-        Returng
+        Return
       </Button>
 
       <article>
@@ -40,7 +42,7 @@ export const PostDetail = ({ post, onBack }: PostDetailProps) => {
           {post.title}
         </h1>
         
-        <div className="flex items-center gap-4 text-muted-foreground text-sm mb-8">
+        <div className="flex items-center gap-4 text-muted-foreground text-sm mb-8 pb-8 border-b border-border/30">
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4" />
             <span>{post.date}</span>
@@ -64,29 +66,31 @@ export const PostDetail = ({ post, onBack }: PostDetailProps) => {
           </button>
         </div>
 
-        <div className="prose prose-invert max-w-none">
-          <div 
-            className="text-secondary-foreground leading-relaxed space-y-4"
-            dangerouslySetInnerHTML={{ __html: formatContent(post.content) }}
-          />
+        {/* PHẦN HIỂN THỊ NỘI DUNG MARKDOWN */}
+        <div className="prose prose-invert max-w-none prose-img:rounded-lg prose-headings:text-foreground prose-a:text-primary hover:prose-a:underline">
+          <ReactMarkdown 
+            remarkPlugins={[remarkGfm]}
+            components={{
+              code({node, className, children, ...props}) {
+                const match = /language-(\w+)/.exec(className || '')
+                return !className ? (
+                  <code className="bg-secondary px-1.5 py-0.5 rounded text-accent font-mono text-sm" {...props}>
+                    {children}
+                  </code>
+                ) : (
+                  <pre className="bg-secondary/50 p-4 rounded-lg overflow-x-auto">
+                    <code className={className} {...props}>
+                      {children}
+                    </code>
+                  </pre>
+                )
+              }
+            }}
+          >
+            {post.content}
+          </ReactMarkdown>
         </div>
       </article>
     </div>
   );
 };
-
-function formatContent(content: string): string {
-  // Simple markdown-like formatting
-  return content
-    .replace(/^### (.*$)/gm, '<h3 class="text-xl font-semibold text-foreground mt-8 mb-4">$1</h3>')
-    .replace(/^## (.*$)/gm, '<h2 class="text-2xl font-semibold text-foreground mt-8 mb-4">$1</h2>')
-    .replace(/^# (.*$)/gm, '<h1 class="text-3xl font-bold text-foreground mt-8 mb-4">$1</h1>')
-    .replace(/`([^`]+)`/g, '<code class="bg-secondary px-2 py-1 rounded text-accent font-mono text-sm">$1</code>')
-    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-foreground">$1</strong>')
-    .replace(/\n\n/g, '</p><p class="mb-4">')
-    .replace(/\n/g, '<br>')
-    .replace(/^\|(.+)\|$/gm, (match, content) => {
-      const cells = content.split('|').map((c: string) => `<td class="border border-border px-3 py-2">${c.trim()}</td>`).join('');
-      return `<tr>${cells}</tr>`;
-    });
-}
