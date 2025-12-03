@@ -6,7 +6,7 @@ import { PostDetail } from '@/components/PostDetail';
 import { ArchiveList } from '@/components/ArchiveList';
 import { AboutPage } from '@/components/AboutPage';
 import { Footer } from '@/components/Footer';
-import yaml from 'js-yaml';
+import { load } from 'js-yaml';
 
 // --- CẤU HÌNH ---
 const CONFIG = {
