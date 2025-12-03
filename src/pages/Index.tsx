@@ -118,14 +118,24 @@ const Index = () => {
     let id = parts[parts.length - 1].replace('.md', '');
     if (id === 'index' && parts[parts.length - 2] !== CONFIG.postsFolder) id = parts[parts.length - 2];
 
+    // 👇 ĐOẠN MỚI: LÀM SẠCH TÓM TẮT
+    const plainText = markdownContent
+      .replace(/^#+\s+/gm, '')        // Xóa dấu # Header
+      .replace(/\|/g, ' ')            // Xóa dấu gạch đứng |
+      .replace(/[-*]\s+/g, '')        // Xóa dấu gạch đầu dòng
+      .replace(/!\[.*?\]\(.*?\)/g, '')// Xóa code ảnh
+      .replace(/\n+/g, ' ')           // Xóa xuống dòng
+      .trim();
+
+    const excerpt = metadata.description || plainText.slice(0, 180) + '...';
+
     return {
       id,
       title: metadata.title || id,
       date: metadata.date || new Date().toISOString().split('T')[0],
-      excerpt: metadata.description || markdownContent.slice(0, 150) + '...',
+      excerpt, // Dùng biến excerpt đã làm sạch
       content: markdownContent,
     };
-  };
 
   const filteredPosts = useMemo(() => {
     if (!searchQuery.trim()) return posts;
