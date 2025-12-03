@@ -6,7 +6,7 @@ import { PostDetail } from '@/components/PostDetail';
 import { ArchiveList } from '@/components/ArchiveList';
 import { AboutPage } from '@/components/AboutPage';
 import { Footer } from '@/components/Footer';
-import { load } from 'js-yaml';
+// import { load } from 'js-yaml'; // Tạm thời comment dòng này nếu vẫn lỗi
 
 // --- CẤU HÌNH ---
 const CONFIG = {
@@ -14,7 +14,8 @@ const CONFIG = {
   githubRepo: 'dqdb23.github.io',
   githubBranch: 'main',
   postsFolder: 'postszz',
-  profileImage: '/cat.jpg'
+  // Lưu ý: Không có dấu chấm ở đầu. Nếu ảnh ở public/cat.jpg thì đường dẫn là /cat.jpg
+  profileImage: '/cat.jpg' 
 };
 
 interface Post { id: string; title: string; date: string; excerpt: string; content: string; }
@@ -26,30 +27,20 @@ const Index = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  // STATE THEME
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
-  // LOGIC ĐỔI THEME
+  // THEME LOGIC
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as 'dark' | 'light' | null;
-    if (savedTheme) {
-      setTheme(savedTheme);
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setTheme('dark');
-    }
+    if (savedTheme) setTheme(savedTheme);
+    else if (window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme('dark');
   }, []);
 
   useEffect(() => {
-    const root = window.document.documentElement;
-    root.classList.remove('light', 'dark');
-    root.classList.add(theme);
+    document.documentElement.classList.remove('light', 'dark');
+    document.documentElement.classList.add(theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-  };
 
   // FETCH DATA
   useEffect(() => {
@@ -62,7 +53,7 @@ const Index = () => {
         const data = await response.json();
         
         const mdFiles = data.tree.filter((item: any) => 
-          item.path.startsWith(CONFIG.postsFolder + '/') && item.path.endsWith('.md')
+          item.path && item.path.startsWith(CONFIG.postsFolder + '/') && item.path.endsWith('.md')
         );
 
         const loadedPosts = await Promise.all(mdFiles.map(async (file: any) => {
@@ -74,18 +65,35 @@ const Index = () => {
 
         loadedPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         setPosts(loadedPosts);
-      } catch (err: any) { setError(err.message); } finally { setLoading(false); }
+      } catch (err: any) {
+        console.error("Fetch error:", err);
+        setError(err.message);
+      } finally { setLoading(false); }
     };
     fetchPosts();
   }, []);
 
+  // PARSE MARKDOWN (SAFE MODE)
   const parseMarkdown = (content: string, filepath: string): Post => {
-    const frontMatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/;
-    const match = content.match(frontMatterRegex);
     let metadata: any = {};
     let markdownContent = content;
 
-    if (match) { try { metadata = load(match[1]); markdownContent = match[2]; } catch (e) {} }
+    try {
+      // Tự parse Frontmatter thủ công để tránh lỗi js-yaml crash
+      const frontMatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/;
+      const match = content.match(frontMatterRegex);
+      if (match) {
+        markdownContent = match[2];
+        // Parse đơn giản title/date/description
+        const metaStr = match[1];
+        metaStr.split('\n').forEach(line => {
+          const [key, ...val] = line.split(':');
+          if (key && val) metadata[key.trim()] = val.join(':').trim();
+        });
+      }
+    } catch (e) {
+      console.warn("Parse error", e);
+    }
 
     const folderPath = filepath.substring(0, filepath.lastIndexOf('/'));
     const baseImageUrl = `https://raw.githubusercontent.com/${CONFIG.githubUser}/${CONFIG.githubRepo}/${CONFIG.githubBranch}/${folderPath}/`;
@@ -93,43 +101,38 @@ const Index = () => {
     markdownContent = markdownContent.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, url) => {
       if (url.startsWith('http')) return match;
       const cleanUrl = url.startsWith('./') ? url.slice(2) : url;
-      let fullUrl = baseImageUrl + cleanUrl;
-      fullUrl = fullUrl.replace(/\s/g, '%20');
-      return `![${alt}](${fullUrl})`;
+      return `![${alt}](${baseImageUrl + cleanUrl})`;
     });
 
     const parts = filepath.split('/');
     let id = parts[parts.length - 1].replace('.md', '');
     if (id === 'index' && parts[parts.length - 2] !== CONFIG.postsFolder) id = parts[parts.length - 2];
 
-    const excerpt = metadata.description || markdownContent.slice(0, 200).replace(/[#*`]/g, '') + '...';
-
     return {
-      id, title: metadata.title || id, date: metadata.date || new Date().toISOString().split('T')[0], excerpt, content: markdownContent,
+      id,
+      title: metadata.title || id,
+      date: metadata.date || new Date().toISOString().split('T')[0],
+      excerpt: metadata.description || markdownContent.slice(0, 150) + '...',
+      content: markdownContent,
     };
   };
 
   const filteredPosts = useMemo(() => {
     if (!searchQuery.trim()) return posts;
-    const query = searchQuery.toLowerCase();
-    return posts.filter(p => p.title.toLowerCase().includes(query) || p.excerpt.toLowerCase().includes(query));
+    const q = searchQuery.toLowerCase();
+    return posts.filter(p => p.title.toLowerCase().includes(q) || p.excerpt.toLowerCase().includes(q));
   }, [searchQuery, posts]);
 
-  const handleReadMore = (post: Post) => { setSelectedPost(post); setActiveTab('detail'); window.scrollTo(0,0); };
-  const handleBack = () => { setSelectedPost(null); setActiveTab('home'); window.scrollTo(0,0); };
-  const handleArchiveSelect = (post: Post) => { setSelectedPost(post); setActiveTab('detail'); window.scrollTo(0,0); };
-
   const renderContent = () => {
-    if (activeTab === 'detail' && selectedPost) return <PostDetail post={selectedPost} onBack={handleBack} />;
-    if (activeTab === 'archive') return <ArchiveList posts={posts} onSelectPost={handleArchiveSelect} />;
+    if (activeTab === 'detail' && selectedPost) return <PostDetail post={selectedPost} onBack={() => {setSelectedPost(null); setActiveTab('home')}} />;
+    if (activeTab === 'archive') return <ArchiveList posts={posts} onSelectPost={(p) => {setSelectedPost(p); setActiveTab('detail')}} />;
     if (activeTab === 'about') return <AboutPage />;
     
     return (
       <div className="min-h-[50vh]">
-        {loading ? <div className="text-center py-20 animate-pulse">Loading posts...</div> :
+        {loading ? <div className="text-center py-20 animate-pulse">Loading...</div> :
          error ? <div className="text-center py-20 text-red-400">Error: {error}</div> :
-         filteredPosts.length > 0 ? filteredPosts.map(p => <PostCard key={p.id} post={p} onReadMore={handleReadMore} />) :
-         <p className="text-center py-20 text-muted-foreground">No posts found.</p>}
+         filteredPosts.map(p => <PostCard key={p.id} post={p} onReadMore={(post) => {setSelectedPost(post); setActiveTab('detail')}} />)}
       </div>
     );
   };
@@ -142,13 +145,9 @@ const Index = () => {
           <Header 
             activeTab={activeTab === 'detail' ? 'home' : activeTab}
             onTabChange={(t) => { setActiveTab(t); if(t==='home') setSelectedPost(null); }}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
+            searchQuery={searchQuery} onSearchChange={setSearchQuery}
             profileImage={CONFIG.profileImage}
-            
-            // 👇 TRUYỀN DỮ LIỆU THEME VÀO ĐÂY
-            theme={theme}
-            onThemeToggle={toggleTheme}
+            theme={theme} onThemeToggle={() => setTheme(p => p === 'dark' ? 'light' : 'dark')}
           />
           <main className="mt-8">{renderContent()}</main>
           <Footer />
