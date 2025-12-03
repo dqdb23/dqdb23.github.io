@@ -1,12 +1,12 @@
 import { useState, useMemo, useEffect } from 'react';
 import { ParticleCanvas } from '@/components/ParticleCanvas';
-import { Header } from '@/components/Header';
+import { Header } from '@/components/Header'; // <-- QUAN TRỌNG: Phải có dấu { }
 import { PostCard } from '@/components/PostCard';
 import { PostDetail } from '@/components/PostDetail';
 import { ArchiveList } from '@/components/ArchiveList';
 import { AboutPage } from '@/components/AboutPage';
 import { Footer } from '@/components/Footer';
-import { load } from 'js-yaml';
+import { load } from 'js-yaml'; // <-- Import đúng chuẩn cho Vite
 
 // --- CẤU HÌNH ---
 const CONFIG = {
@@ -14,7 +14,7 @@ const CONFIG = {
   githubRepo: 'dqdb23.github.io',
   githubBranch: 'main',
   postsFolder: 'postszz',
-  profileImage: '/cat.jpg'
+  profileImage: '/cat.jpg' // Đảm bảo file cat.jpg nằm trong thư mục 'public'
 };
 
 interface Post {
@@ -66,7 +66,7 @@ const Index = () => {
     fetchPosts();
   }, []);
 
-  // HÀM XỬ LÝ MARKDOWN & LINK ẢNH
+  // HÀM XỬ LÝ MARKDOWN
   const parseMarkdown = (content: string, filepath: string): Post => {
     const frontMatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/;
     const match = content.match(frontMatterRegex);
@@ -77,22 +77,16 @@ const Index = () => {
       try { metadata = load(match[1]); markdownContent = match[2]; } catch (e) {}
     }
 
-    // --- LOGIC FIX ẢNH QUAN TRỌNG ---
     const folderPath = filepath.substring(0, filepath.lastIndexOf('/'));
-    // Lưu ý: encodeURI để xử lý dấu cách trong tên thư mục (ví dụ: "APT32 malware analysis")
     const baseImageUrl = `https://raw.githubusercontent.com/${CONFIG.githubUser}/${CONFIG.githubRepo}/${CONFIG.githubBranch}/${folderPath}/`;
     
     markdownContent = markdownContent.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, url) => {
       if (url.startsWith('http')) return match;
       const cleanUrl = url.startsWith('./') ? url.slice(2) : url;
       let fullUrl = baseImageUrl + cleanUrl;
-      
-      // MÃ HÓA DẤU CÁCH THÀNH %20 ĐỂ TRÌNH DUYỆT HIỂU
       fullUrl = fullUrl.replace(/\s/g, '%20');
-      
       return `![${alt}](${fullUrl})`;
     });
-    // -------------------------------
 
     const parts = filepath.split('/');
     let id = parts[parts.length - 1].replace('.md', '');
@@ -139,7 +133,13 @@ const Index = () => {
       <ParticleCanvas />
       <div className="content-container relative z-10">
         <div className="max-w-2xl mx-auto px-4 py-12 md:py-16">
-          <Header activeTab={activeTab === 'detail' ? 'home' : activeTab} onTabChange={(t) => { setActiveTab(t); if(t==='home') setSelectedPost(null); }} searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+          <Header 
+            activeTab={activeTab === 'detail' ? 'home' : activeTab}
+            onTabChange={(t) => { setActiveTab(t); if(t==='home') setSelectedPost(null); }} 
+            searchQuery={searchQuery} 
+            onSearchChange={setSearchQuery} 
+            profileImage={CONFIG.profileImage} // <-- QUAN TRỌNG: Truyền ảnh vào Header
+          />
           <main className="mt-8">{renderContent()}</main>
           <Footer />
         </div>
