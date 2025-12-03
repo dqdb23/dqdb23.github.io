@@ -14,6 +14,7 @@ const CONFIG = {
   githubRepo: 'dqdb23.github.io',
   githubBranch: 'main',
   postsFolder: 'postszz',
+  profileImage: '/cat.jpg'
 };
 
 interface Post {
