@@ -73,7 +73,7 @@ const Index = () => {
     let markdownContent = content;
 
     if (match) {
-      try { metadata = yaml.load(match[1]); markdownContent = match[2]; } catch (e) {}
+      try { metadata = load(match[1]); markdownContent = match[2]; } catch (e) {}
     }
 
     // --- LOGIC FIX ẢNH QUAN TRỌNG ---
