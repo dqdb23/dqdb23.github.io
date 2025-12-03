@@ -1,89 +1,82 @@
-import { useState } from 'react';
-import { Search, Palette } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ThemeModal } from './ThemeModal';
+import { Search } from 'lucide-react';
 
 interface HeaderProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  profileImage?: string; // Thêm dòng này để nhận ảnh
 }
 
-export const Header = ({ activeTab, onTabChange, searchQuery, onSearchChange }: HeaderProps) => {
-  const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
-
-  const tabs = [
-    { id: 'home', label: 'Homei' },
-    { id: 'archive', label: 'Archivee' },
-    { id: 'about', label: 'Abuot' },
-  ];
-
+export const Header = ({ 
+  activeTab, 
+  onTabChange, 
+  searchQuery, 
+  onSearchChange,
+  profileImage // Nhận biến ảnh
+}: HeaderProps) => {
   return (
-    <header className="mb-10 pb-6 border-b border-border/50">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6">
+    <header className="mb-12 animate-fade-in">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
         <div className="flex items-center gap-6">
-          <div className="relative">
-            <img
-              src="https://github.com/dqdb23/dqdb23.github.io/blob/main/cat.jpg?raw=true"
+          <div className="relative group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-full opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 blur"></div>
+            <img 
+              // Nếu không có ảnh thì dùng ảnh placeholder
+              src={profileImage || "https://github.com/shadcn.png"} 
               alt="Profile"
-              className="w-28 h-28 md:w-36 md:h-36 rounded-full object-cover border-4 border-primary/50 shadow-lg animate-pulse-glow"
+              className="relative w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-background"
+              onError={(e) => {
+                // Nếu lỗi load ảnh thì chuyển về ảnh mặc định
+                e.currentTarget.src = "https://github.com/shadcn.png";
+              }}
             />
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 animate-pulse" />
           </div>
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground glow-text">
+          
+          <div className="space-y-2">
+            <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">
               \Some..............
             </h1>
-            <p className="text-muted-foreground mt-2 text-sm md:text-base">
-              Malware Analyste - Cybeer Thread Huntin
+            <p className="text-muted-foreground font-mono text-sm md:text-base">
+              Malware Analyst - Cyber Threat Hunting
             </p>
           </div>
         </div>
-        
-        <Button
-          onClick={() => setIsThemeModalOpen(true)}
-          className="bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 rounded-full px-4 py-2 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20"
-        >
-          <Palette className="w-4 h-4 mr-2" />
-          Thêmê
-        </Button>
+
+        <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 hover:bg-secondary transition-colors text-sm font-medium border border-white/10">
+          <span className="w-4 h-4 rounded-full bg-gradient-to-tr from-primary to-accent animate-pulse" />
+          Theme
+        </button>
       </div>
 
-      {/* Search Bar */}
-      <div className="relative mb-6">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-        <Input
-          type="text"
-          placeholder="Fiend..."
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-12 bg-card/50 border-border/50 rounded-full py-6 text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/30 transition-all duration-300"
-        />
+      <div className="space-y-6">
+        <div className="relative group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+          <input
+            type="text"
+            placeholder="Find..."
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="w-full bg-secondary/30 border border-white/10 rounded-2xl py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-secondary/50 transition-all placeholder:text-muted-foreground/50"
+          />
+        </div>
+
+        <nav className="flex gap-2 p-1 bg-secondary/30 rounded-xl w-fit backdrop-blur-sm border border-white/5">
+          {['home', 'archive', 'about'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => onTabChange(tab)}
+              className={`px-6 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                activeTab === tab
+                  ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+              }`}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
+        </nav>
       </div>
-
-      {/* Navigation */}
-      <nav className="flex gap-6">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => onTabChange(tab.id)}
-            className={`relative text-base font-medium pb-2 transition-colors duration-300 ${
-              activeTab === tab.id
-                ? 'text-primary'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {tab.label}
-            {activeTab === tab.id && (
-              <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded-full" />
-            )}
-          </button>
-        ))}
-      </nav>
-
-      <ThemeModal isOpen={isThemeModalOpen} onClose={() => setIsThemeModalOpen(false)} />
     </header>
   );
 };
