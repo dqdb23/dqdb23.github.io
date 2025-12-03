@@ -13,7 +13,7 @@ const CONFIG = {
   githubRepo: 'dqdb23.github.io',
   githubBranch: 'main',
   postsFolder: 'postszz',
-  profileImage: '/cat.jpg' // Ảnh này phải nằm trong thư mục public
+  profileImage: '/cat.jpg'
 };
 
 interface Post { id: string; title: string; date: string; excerpt: string; content: string; }
@@ -71,27 +71,23 @@ const Index = () => {
     fetchPosts();
   }, []);
 
-  // --- HÀM TỰ XỬ LÝ MARKDOWN (KHÔNG DÙNG THƯ VIỆN ĐỂ TRÁNH LỖI) ---
+  // PARSE MARKDOWN (REGEX - SAFE MODE)
   const parseMarkdown = (content: string, filepath: string): Post => {
     let metadata: any = {};
     let markdownContent = content;
 
     try {
-      // 1. Tự tách Header bằng Regex (An toàn tuyệt đối)
       const frontMatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/;
       const match = content.match(frontMatterRegex);
       
       if (match) {
         const metaStr = match[1];
         markdownContent = match[2];
-
-        // 2. Đọc từng dòng key: value
         metaStr.split('\n').forEach(line => {
           const colonIndex = line.indexOf(':');
           if (colonIndex !== -1) {
             const key = line.slice(0, colonIndex).trim();
             let val = line.slice(colonIndex + 1).trim();
-            // Xóa dấu ngoặc kép nếu có
             if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
               val = val.slice(1, -1);
             }
@@ -101,7 +97,7 @@ const Index = () => {
       }
     } catch (e) { console.warn("Parse error", e); }
 
-    // 3. Xử lý Link ảnh
+    // FIX ẢNH
     const folderPath = filepath.substring(0, filepath.lastIndexOf('/'));
     const baseImageUrl = `https://raw.githubusercontent.com/${CONFIG.githubUser}/${CONFIG.githubRepo}/${CONFIG.githubBranch}/${folderPath}/`;
     
@@ -113,29 +109,30 @@ const Index = () => {
       return `![${alt}](${fullUrl})`;
     });
 
-    // 4. Xử lý ID
+    // XỬ LÝ ID
     const parts = filepath.split('/');
     let id = parts[parts.length - 1].replace('.md', '');
     if (id === 'index' && parts[parts.length - 2] !== CONFIG.postsFolder) id = parts[parts.length - 2];
 
-    // 👇 ĐOẠN MỚI: LÀM SẠCH TÓM TẮT
+    // TẠO EXCERPT SẠCH
     const plainText = markdownContent
-      .replace(/^#+\s+/gm, '')        // Xóa dấu # Header
-      .replace(/\|/g, ' ')            // Xóa dấu gạch đứng |
-      .replace(/[-*]\s+/g, '')        // Xóa dấu gạch đầu dòng
-      .replace(/!\[.*?\]\(.*?\)/g, '')// Xóa code ảnh
-      .replace(/\n+/g, ' ')           // Xóa xuống dòng
+      .replace(/^#+\s+/gm, '')
+      .replace(/\|/g, ' ')
+      .replace(/[-*]\s+/g, '')
+      .replace(/!\[.*?\]\(.*?\)/g, '')
+      .replace(/\[.*?\]\(.*?\)/g, '')
+      .replace(/`{1,3}.*?`{1,3}/gs, '')
+      .replace(/\n+/g, ' ')
       .trim();
-
-    const excerpt = metadata.description || plainText.slice(0, 180) + '...';
 
     return {
       id,
       title: metadata.title || id,
       date: metadata.date || new Date().toISOString().split('T')[0],
-      excerpt, // Dùng biến excerpt đã làm sạch
+      excerpt: metadata.description || plainText.slice(0, 180) + '...',
       content: markdownContent,
     };
+  };
 
   const filteredPosts = useMemo(() => {
     if (!searchQuery.trim()) return posts;
@@ -157,12 +154,9 @@ const Index = () => {
     );
   };
 
-return (
+  return (
     <div className="min-h-screen bg-background relative overflow-hidden font-sans text-foreground transition-colors duration-300">
-      
-      {/* 👇 CHỈ HIỆN HIỆU ỨNG HẠT KHI Ở CHẾ ĐỘ DARK */}
       {theme === 'dark' && <ParticleCanvas />}
-      
       <div className="content-container relative z-10">
         <div className="max-w-2xl mx-auto px-4 py-12 md:py-16">
           <Header 
@@ -178,6 +172,6 @@ return (
       </div>
     </div>
   );
-};
+}; 
 
 export default Index;
