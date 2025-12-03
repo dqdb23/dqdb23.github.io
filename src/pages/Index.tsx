@@ -1,28 +1,23 @@
 import { useState, useMemo, useEffect } from 'react';
 import { ParticleCanvas } from '@/components/ParticleCanvas';
-import { Header } from '@/components/Header'; // <-- QUAN TRỌNG: Phải có dấu { }
+import { Header } from '@/components/Header';
 import { PostCard } from '@/components/PostCard';
 import { PostDetail } from '@/components/PostDetail';
 import { ArchiveList } from '@/components/ArchiveList';
 import { AboutPage } from '@/components/AboutPage';
 import { Footer } from '@/components/Footer';
-import { load } from 'js-yaml'; // <-- Import đúng chuẩn cho Vite
+import { load } from 'js-yaml';
 
-// --- CẤU HÌNH ---
 const CONFIG = {
   githubUser: 'dqdb23',
   githubRepo: 'dqdb23.github.io',
   githubBranch: 'main',
   postsFolder: 'postszz',
-  profileImage: '/cat.jpg' // Đảm bảo file cat.jpg nằm trong thư mục 'public'
+  profileImage: '/cat.jpg'
 };
 
 interface Post {
-  id: string;
-  title: string;
-  date: string;
-  excerpt: string;
-  content: string;
+  id: string; title: string; date: string; excerpt: string; content: string;
 }
 
 const Index = () => {
@@ -32,6 +27,33 @@ const Index = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // 👇 THÊM STATE CHO THEME
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  // 👇 LOGIC ĐỔI THEME
+  useEffect(() => {
+    // 1. Kiểm tra theme đã lưu hoặc theme hệ thống
+    const savedTheme = localStorage.getItem('theme') as 'dark' | 'light' | null;
+    if (savedTheme) {
+      setTheme(savedTheme);
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setTheme('dark');
+    }
+  }, []);
+
+  useEffect(() => {
+    // 2. Áp dụng class vào thẻ <html>
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
+    root.classList.add(theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
+  // ----------------------------------------------------
 
   // FETCH DATA
   useEffect(() => {
@@ -44,8 +66,7 @@ const Index = () => {
         const data = await response.json();
         
         const mdFiles = data.tree.filter((item: any) => 
-          item.path.startsWith(CONFIG.postsFolder + '/') && 
-          item.path.endsWith('.md')
+          item.path.startsWith(CONFIG.postsFolder + '/') && item.path.endsWith('.md')
         );
 
         const loadedPosts = await Promise.all(mdFiles.map(async (file: any) => {
@@ -57,25 +78,18 @@ const Index = () => {
 
         loadedPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         setPosts(loadedPosts);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
+      } catch (err: any) { setError(err.message); } finally { setLoading(false); }
     };
     fetchPosts();
   }, []);
 
-  // HÀM XỬ LÝ MARKDOWN
   const parseMarkdown = (content: string, filepath: string): Post => {
     const frontMatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/;
     const match = content.match(frontMatterRegex);
     let metadata: any = {};
     let markdownContent = content;
 
-    if (match) {
-      try { metadata = load(match[1]); markdownContent = match[2]; } catch (e) {}
-    }
+    if (match) { try { metadata = load(match[1]); markdownContent = match[2]; } catch (e) {} }
 
     const folderPath = filepath.substring(0, filepath.lastIndexOf('/'));
     const baseImageUrl = `https://raw.githubusercontent.com/${CONFIG.githubUser}/${CONFIG.githubRepo}/${CONFIG.githubBranch}/${folderPath}/`;
@@ -95,11 +109,7 @@ const Index = () => {
     const excerpt = metadata.description || markdownContent.slice(0, 200).replace(/[#*`]/g, '') + '...';
 
     return {
-      id,
-      title: metadata.title || id,
-      date: metadata.date || new Date().toISOString().split('T')[0],
-      excerpt,
-      content: markdownContent,
+      id, title: metadata.title || id, date: metadata.date || new Date().toISOString().split('T')[0], excerpt, content: markdownContent,
     };
   };
 
@@ -129,20 +139,35 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden font-sans text-foreground">
+    <div className="min-h-screen bg-background relative overflow-hidden font-sans text-foreground transition-colors duration-300">
       <ParticleCanvas />
       <div className="content-container relative z-10">
         <div className="max-w-2xl mx-auto px-4 py-12 md:py-16">
           <Header 
             activeTab={activeTab === 'detail' ? 'home' : activeTab}
-            onTabChange={(t) => { setActiveTab(t); if(t==='home') setSelectedPost(null); }} 
-            searchQuery={searchQuery} 
-            onSearchChange={setSearchQuery} 
-            profileImage={CONFIG.profileImage} // <-- QUAN TRỌNG: Truyền ảnh vào Header
+            onTabChange={(t) => { setActiveTab(t); if(t==='home') setSelectedPost(null); }}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            profileImage={CONFIG.profileImage}
+            // 👇 TRUYỀN PROPS THEME VÀO HEADER
+            theme={theme}
+            onThemeToggle={toggleTheme}
           />
           <main className="mt-8">{renderContent()}</main>
           <Footer />
         </div>
+      </div>
+      
+      {/* BACKGROUND DECORATIONS (Chỉ hiện khi màn hình lớn) */}
+      <div className="fixed left-4 top-1/2 -translate-y-1/2 hidden xl:flex flex-col gap-8 text-muted-foreground/20 text-xs font-mono font-bold tracking-widest z-0 select-none">
+        <span className="writing-vertical rotate-180">MALWARE</span>
+        <span className="writing-vertical rotate-180">THREAT</span>
+        <span className="writing-vertical rotate-180">CYBER</span>
+      </div>
+      <div className="fixed right-4 top-1/2 -translate-y-1/2 hidden xl:flex flex-col gap-8 text-muted-foreground/20 text-xs font-mono font-bold tracking-widest z-0 select-none">
+        <span className="writing-vertical rotate-180">REVERSE</span>
+        <span className="writing-vertical rotate-180">APT</span>
+        <span className="writing-vertical rotate-180">IOC</span>
       </div>
     </div>
   );
