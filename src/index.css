@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    /* --- LIGHT MODE (GIAO DIỆN SÁNG) --- */
+    /* --- LIGHT MODE (GIAO DIỆN SÁNG - ĐÃ SỬA LẠI MÀU TRẮNG) --- */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
@@ -35,9 +35,9 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    /* Giữ nguyên các màu Custom nhưng chỉnh cho hợp nền sáng */
+    /* Custom colors cho Light mode */
     --cyber-green: 160 100% 35%;
     --cyber-cyan: 185 100% 40%;
     --cyber-purple: 270 80% 50%;
@@ -46,7 +46,7 @@
   }
 
   .dark {
-    /* --- DARK MODE (GIAO DIỆN TỐI - CỦA BẠN) --- */
+    /* --- DARK MODE (GIAO DIỆN TỐI) --- */
     --background: 220 15% 8%;
     --foreground: 210 20% 90%;
 
@@ -75,7 +75,7 @@
     --input: 220 15% 20%;
     --ring: 210 100% 60%;
 
-    /* Custom colors cho dark mode */
+    /* Custom colors cho Dark mode */
     --cyber-green: 160 100% 45%;
     --cyber-cyan: 185 100% 50%;
     --cyber-purple: 270 80% 60%;
@@ -160,7 +160,7 @@
     animation: slide-up 0.5s ease-out;
   }
 
-  /* ĐOẠN NÀY ĐỂ HIỂN THỊ CHỮ DỌC 2 BÊN */
+  /* CLASS CHỮ DỌC 2 BÊN */
   .writing-vertical {
     writing-mode: vertical-rl;
     text-orientation: mixed;
