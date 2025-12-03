@@ -8,6 +8,7 @@ import { AboutPage } from '@/components/AboutPage';
 import { Footer } from '@/components/Footer';
 import { load } from 'js-yaml';
 
+// --- CẤU HÌNH ---
 const CONFIG = {
   githubUser: 'dqdb23',
   githubRepo: 'dqdb23.github.io',
@@ -16,9 +17,7 @@ const CONFIG = {
   profileImage: '/cat.jpg'
 };
 
-interface Post {
-  id: string; title: string; date: string; excerpt: string; content: string;
-}
+interface Post { id: string; title: string; date: string; excerpt: string; content: string; }
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('home');
@@ -28,12 +27,11 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // 👇 THÊM STATE CHO THEME
+  // STATE THEME
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
-  // 👇 LOGIC ĐỔI THEME
+  // LOGIC ĐỔI THEME
   useEffect(() => {
-    // 1. Kiểm tra theme đã lưu hoặc theme hệ thống
     const savedTheme = localStorage.getItem('theme') as 'dark' | 'light' | null;
     if (savedTheme) {
       setTheme(savedTheme);
@@ -43,7 +41,6 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
-    // 2. Áp dụng class vào thẻ <html>
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
@@ -53,7 +50,6 @@ const Index = () => {
   const toggleTheme = () => {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
-  // ----------------------------------------------------
 
   // FETCH DATA
   useEffect(() => {
@@ -139,7 +135,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden font-sans text-foreground transition-colors duration-300">
+    <div className="min-h-screen bg-background relative overflow-hidden font-sans text-foreground">
       <ParticleCanvas />
       <div className="content-container relative z-10">
         <div className="max-w-2xl mx-auto px-4 py-12 md:py-16">
@@ -149,25 +145,14 @@ const Index = () => {
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             profileImage={CONFIG.profileImage}
-            // 👇 TRUYỀN PROPS THEME VÀO HEADER
+            
+            // 👇 TRUYỀN DỮ LIỆU THEME VÀO ĐÂY
             theme={theme}
             onThemeToggle={toggleTheme}
           />
           <main className="mt-8">{renderContent()}</main>
           <Footer />
         </div>
-      </div>
-      
-      {/* BACKGROUND DECORATIONS (Chỉ hiện khi màn hình lớn) */}
-      <div className="fixed left-4 top-1/2 -translate-y-1/2 hidden xl:flex flex-col gap-8 text-muted-foreground/20 text-xs font-mono font-bold tracking-widest z-0 select-none">
-        <span className="writing-vertical rotate-180">MALWARE</span>
-        <span className="writing-vertical rotate-180">THREAT</span>
-        <span className="writing-vertical rotate-180">CYBER</span>
-      </div>
-      <div className="fixed right-4 top-1/2 -translate-y-1/2 hidden xl:flex flex-col gap-8 text-muted-foreground/20 text-xs font-mono font-bold tracking-widest z-0 select-none">
-        <span className="writing-vertical rotate-180">REVERSE</span>
-        <span className="writing-vertical rotate-180">APT</span>
-        <span className="writing-vertical rotate-180">IOC</span>
       </div>
     </div>
   );
