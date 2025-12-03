@@ -6,7 +6,6 @@ import { PostDetail } from '@/components/PostDetail';
 import { ArchiveList } from '@/components/ArchiveList';
 import { AboutPage } from '@/components/AboutPage';
 import { Footer } from '@/components/Footer';
-// import { load } from 'js-yaml'; // Tạm thời comment dòng này nếu vẫn lỗi
 
 // --- CẤU HÌNH ---
 const CONFIG = {
@@ -14,8 +13,7 @@ const CONFIG = {
   githubRepo: 'dqdb23.github.io',
   githubBranch: 'main',
   postsFolder: 'postszz',
-  // Lưu ý: Không có dấu chấm ở đầu. Nếu ảnh ở public/cat.jpg thì đường dẫn là /cat.jpg
-  profileImage: '/cat.jpg' 
+  profileImage: '/cat.jpg' // Ảnh này phải nằm trong thư mục public
 };
 
 interface Post { id: string; title: string; date: string; excerpt: string; content: string; }
@@ -31,8 +29,8 @@ const Index = () => {
 
   // THEME LOGIC
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as 'dark' | 'light' | null;
-    if (savedTheme) setTheme(savedTheme);
+    const saved = localStorage.getItem('theme') as 'dark' | 'light';
+    if (saved) setTheme(saved);
     else if (window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme('dark');
   }, []);
 
@@ -66,44 +64,56 @@ const Index = () => {
         loadedPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         setPosts(loadedPosts);
       } catch (err: any) {
-        console.error("Fetch error:", err);
+        console.error(err);
         setError(err.message);
       } finally { setLoading(false); }
     };
     fetchPosts();
   }, []);
 
-  // PARSE MARKDOWN (SAFE MODE)
+  // --- HÀM TỰ XỬ LÝ MARKDOWN (KHÔNG DÙNG THƯ VIỆN ĐỂ TRÁNH LỖI) ---
   const parseMarkdown = (content: string, filepath: string): Post => {
     let metadata: any = {};
     let markdownContent = content;
 
     try {
-      // Tự parse Frontmatter thủ công để tránh lỗi js-yaml crash
+      // 1. Tự tách Header bằng Regex (An toàn tuyệt đối)
       const frontMatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/;
       const match = content.match(frontMatterRegex);
+      
       if (match) {
-        markdownContent = match[2];
-        // Parse đơn giản title/date/description
         const metaStr = match[1];
+        markdownContent = match[2];
+
+        // 2. Đọc từng dòng key: value
         metaStr.split('\n').forEach(line => {
-          const [key, ...val] = line.split(':');
-          if (key && val) metadata[key.trim()] = val.join(':').trim();
+          const colonIndex = line.indexOf(':');
+          if (colonIndex !== -1) {
+            const key = line.slice(0, colonIndex).trim();
+            let val = line.slice(colonIndex + 1).trim();
+            // Xóa dấu ngoặc kép nếu có
+            if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+              val = val.slice(1, -1);
+            }
+            metadata[key] = val;
+          }
         });
       }
-    } catch (e) {
-      console.warn("Parse error", e);
-    }
+    } catch (e) { console.warn("Parse error", e); }
 
+    // 3. Xử lý Link ảnh
     const folderPath = filepath.substring(0, filepath.lastIndexOf('/'));
     const baseImageUrl = `https://raw.githubusercontent.com/${CONFIG.githubUser}/${CONFIG.githubRepo}/${CONFIG.githubBranch}/${folderPath}/`;
     
     markdownContent = markdownContent.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, url) => {
       if (url.startsWith('http')) return match;
       const cleanUrl = url.startsWith('./') ? url.slice(2) : url;
-      return `![${alt}](${baseImageUrl + cleanUrl})`;
+      let fullUrl = baseImageUrl + cleanUrl;
+      fullUrl = fullUrl.replace(/\s/g, '%20');
+      return `![${alt}](${fullUrl})`;
     });
 
+    // 4. Xử lý ID
     const parts = filepath.split('/');
     let id = parts[parts.length - 1].replace('.md', '');
     if (id === 'index' && parts[parts.length - 2] !== CONFIG.postsFolder) id = parts[parts.length - 2];
@@ -130,7 +140,7 @@ const Index = () => {
     
     return (
       <div className="min-h-[50vh]">
-        {loading ? <div className="text-center py-20 animate-pulse">Loading...</div> :
+        {loading ? <div className="text-center py-20 animate-pulse">Loading posts...</div> :
          error ? <div className="text-center py-20 text-red-400">Error: {error}</div> :
          filteredPosts.map(p => <PostCard key={p.id} post={p} onReadMore={(post) => {setSelectedPost(post); setActiveTab('detail')}} />)}
       </div>
