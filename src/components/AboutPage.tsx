@@ -91,7 +91,7 @@ export const AboutPage = () => {
             GitHub
           </a>
           <a 
-            href="#" 
+            href="https://github.com/dqdb23" 
             className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 text-secondary-foreground hover:bg-primary/20 hover:text-primary transition-all duration-300"
           >
             <Twitter className="w-4 h-4" />
