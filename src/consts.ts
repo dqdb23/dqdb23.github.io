@@ -5,7 +5,7 @@ export const SITE: Site = {
   description:
     'Malware Analyst | Cyber Threat Hunter',
   href: 'https://dqdb23.github.io',
-  author: 'sonz',
+  author: 'sonzz',
   locale: 'vie',
   featuredPostCount: 2,
   postsPerPage: 3,
