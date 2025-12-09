@@ -53,3 +53,16 @@ export const ICON_MAP: IconMap = {
   Email: 'lucide:mail',
   RSS: 'lucide:rss',
 }
+
+export const AUTHORS = {
+  sonzz: {
+    name: 'sonzz',
+    avatar: '/avatars/sonzz.jpg',
+    bio: 'Malware Analyst | Cyber Threat Hunter',
+    social: {
+      github: 'https://github.com/dqdb23',
+      twitter: 'https://twitter.com/dqdb23',
+      email: 'vtrsonnnnnnn@gmail.com'
+    }
+  }
+}
