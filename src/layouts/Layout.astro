@@ -1,7 +1,7 @@
 ---
 import '@/styles/global.css'
 import '@/styles/typography.css'
-
+import SidebarGif from '@/components/SidebarGif.astro'
 import Footer from '@/components/Footer.astro'
 import Head from '@/components/Head.astro'
 import Header from '@/components/Header.astro'
@@ -31,11 +31,15 @@ const { class: className } = Astro.props
       <slot name="subposts-navigation" />
       <slot name="table-of-contents" />
     </header>
+     <!-- WRAPPER: Sidebar + Main -->
+    <div class="w-full mx-auto flex grow flex-row gap-x-6 px-4">
+    <SidebarGif />
     <main
       class={cn('w-full mx-auto flex grow flex-col gap-y-6 px-4', className)}
     >
       <slot />
     </main>
+  </div>
     <Footer />
   </body>
 </html>
