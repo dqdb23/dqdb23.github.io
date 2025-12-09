@@ -75,3 +75,9 @@
     @apply border-border outline-ring/50 tracking-tight;
   }
 }
+
+@media (min-width: 1024px) {
+  main {
+    margin-left: 220px !important;
+  }
+}
