@@ -2,7 +2,7 @@
 title: "Bypassing Antivirus: Scantime using nostdlib Technique"
 description: "A detailed technical guide on using nostdlib to reduce PE metadata, remove imports, and evade antivirus static detection during scantime."
 date: "2025-12-10"
-tags: ["antivirus-evasion"]
+tags: ["antivirus-evasion"], ["C++"]
 image: './banner.png'
 authors: ['sonzz']
 ---
@@ -246,5 +246,6 @@ This avoids linking ```kernel32.lib``` and ```user32.lib```, keeping the Import 
 ## VI. Conclusion
 
 The nostdlib technique is one of the most effective methods defeating classical antivirus scantime analysis
+
 
 
